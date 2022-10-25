@@ -108,7 +108,7 @@ mysqlSetup() {
    checkAccept $result
    if [ $result != false ]
    then
-      apt mysql_secure_installation
+      mysql_secure_installation
    fi
 }
 
@@ -131,8 +131,12 @@ softwareSetup() {
 }
 
 uCrewSetup() {
-   ucrew_repository="http://192.168.0.10:3000/pavel/uCrew.git"
+   apache2_configuration_file="/etc/apache2/sites-available/99-uCrew.conf"
+   ucrew_repository="https://github.com/stellar-creator/uCrew.git"
    ucrew_location="/var/www/uCrew"
+   ucrew_server="localhost"
+   ucrew_port="80"
+   ucrew_admin="admin@localhost"
    # Run configurator
    get "Do you want to intall uCrew with default configuration? [y/n]" "auto"
    checkAccept $result
@@ -142,14 +146,49 @@ uCrewSetup() {
       ucrew_repository=$result
       get "Local installation directory"
       ucrew_location=$result
+      get "Server address"
+      ucrew_server=$result
+      get "Server administrator"
+      ucrew_admin=$result
    fi  
    # Finish data prepare
    message "uCrew will be installed with next parameters:"
    message "Git repository: $ucrew_repository"
    message "Directory: $ucrew_location"
+   message "Server address: $ucrew_server"
+   message "Server port: $ucrew_port"
+   message "Server administrator: $ucrew_port"
    # Download last uCrew
    message "Download uCrew to $ucrew_location"
    git clone $ucrew_repository "$ucrew_location"
+   message "Add uCrew to apache2 server"
+   apache2_configuration="
+      <VirtualHost *:$ucrew_port>
+              ServerAdmin $ucrew_admin
+              ServerName uCrew
+              ServerAlias $ucrew_server
+              DocumentRoot \"$ucrew_location/\"
+              <Directory \"$ucrew_location/\">
+                      Options Indexes FollowSymLinks MultiViews
+                      AllowOverride All
+                      Order allow,deny
+                      allow from all
+                      Require all granted
+                      Header always set X-Frame-Options "SAMEORIGIN"
+              </Directory>
+              ErrorLog \${APACHE_LOG_DIR}/error.log
+              CustomLog \${APACHE_LOG_DIR}/access.log combined
+      </VirtualHost>
+
+      # vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+   "
+   message "Write to $apache2_configuration_file"
+   echo $apache2_configuration > apache2_configuration_file
+   message "Append apache2 configuration"
+   a2ensite 99-uCrew
+   message "Restart apache2"
+   systemctl restart apache2
+   message "Setup is done! Please open in browser you uCrew."
 }
 
 # Run main script steps
