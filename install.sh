@@ -157,7 +157,7 @@ uCrewSetup() {
    message "Directory: $ucrew_location"
    message "Server address: $ucrew_server"
    message "Server port: $ucrew_port"
-   message "Server administrator: $ucrew_port"
+   message "Server administrator: $ucrew_admin"
    # Download last uCrew
    message "Download uCrew to $ucrew_location"
    git clone $ucrew_repository "$ucrew_location"
@@ -183,7 +183,8 @@ uCrewSetup() {
       # vim: syntax=apache ts=4 sw=4 sts=4 sr noet
    "
    message "Write to $apache2_configuration_file"
-   echo $apache2_configuration > apache2_configuration_file
+   touch "$apache2_configuration_file"
+   echo "$apache2_configuration" > "$apache2_configuration_file"
    message "Append apache2 configuration"
    a2ensite 99-uCrew
    message "Restart apache2"
