@@ -104,12 +104,6 @@ mysqlSetup() {
    then
       apt install -y mysql-server
    fi
-   get "Do you want to configure MySQL server? [y/n]" "auto"
-   checkAccept $result
-   if [ $result != false ]
-   then
-      mysql_secure_installation
-   fi
 }
 
 # Setup php
@@ -162,26 +156,27 @@ uCrewSetup() {
    message "Download uCrew to $ucrew_location"
    git clone $ucrew_repository "$ucrew_location"
    message "Add uCrew to apache2 server"
-   apache2_configuration="
-      <VirtualHost *:$ucrew_port>
-              ServerAdmin $ucrew_admin
-              ServerName uCrew
-              ServerAlias $ucrew_server
-              DocumentRoot \"$ucrew_location/\"
-              <Directory \"$ucrew_location/\">
-                      Options Indexes FollowSymLinks MultiViews
-                      AllowOverride All
-                      Order allow,deny
-                      allow from all
-                      Require all granted
-                      Header always set X-Frame-Options "SAMEORIGIN"
-              </Directory>
-              ErrorLog \${APACHE_LOG_DIR}/error.log
-              CustomLog \${APACHE_LOG_DIR}/access.log combined
-      </VirtualHost>
+   
+   apache2_configuration="<VirtualHost *:$ucrew_port>
+        ServerAdmin $ucrew_admin
+        ServerName uCrew
+        ServerAlias $ucrew_server
+        DocumentRoot \"$ucrew_location/\"
+        <Directory \"$ucrew_location/\">
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride All
+                Order allow,deny
+                allow from all
+                Require all granted
+                Header always set X-Frame-Options "SAMEORIGIN"
+        </Directory>
+        ErrorLog \${APACHE_LOG_DIR}/error.log
+        CustomLog \${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
 
-      # vim: syntax=apache ts=4 sw=4 sts=4 sr noet
-   "
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+"
+
    message "Write to $apache2_configuration_file"
    touch "$apache2_configuration_file"
    echo "$apache2_configuration" > "$apache2_configuration_file"
@@ -189,6 +184,12 @@ uCrewSetup() {
    a2ensite 99-uCrew
    message "Restart apache2"
    systemctl restart apache2
+   get "Do you want to configure MySQL server? [y/n]" "auto"
+   checkAccept $result
+   if [ $result != false ]
+   then
+      mysql_secure_installation
+   fi
    message "Setup is done! Please open in browser you uCrew."
 }
 
