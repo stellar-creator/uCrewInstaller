@@ -67,7 +67,7 @@ basicSetup() {
       exit
    fi
    # Update current repository
-   apt update
+   apt -y update
 }
 
 # Setup git
@@ -76,7 +76,7 @@ gitSetup() {
    checkAccept $result
    if [ $result != false ]
    then
-      apt install git
+      apt install -y git
    fi
 }
 
@@ -86,7 +86,7 @@ apacheSetup() {
    checkAccept $result
    if [ $result != false ]
    then
-      apt install apache2
+      apt install -y apache2
    fi
    get "Do you want to add apache2 to firewall? [y/n]" "auto"
    checkAccept $result
@@ -102,7 +102,7 @@ mysqlSetup() {
    checkAccept $result
    if [ $result != false ]
    then
-      apt install mysql-server
+      apt install -y mysql-server
    fi
    get "Do you want to configure MySQL server? [y/n]" "auto"
    checkAccept $result
@@ -118,7 +118,7 @@ phpSetup() {
    checkAccept $result
    if [ $result != false ]
    then
-      apt install php libapache2-mod-php php-mysql
+      apt install -y php libapache2-mod-php php-mysql
    fi
 }
 
